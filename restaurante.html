@@ -161,6 +161,7 @@
 /* =========================================================
    EDITA SOLO ESTA PARTE
    - Cambia los datos del negocio y los platillos.
+   - Si usas una hoja de Google, los platillos se editan allá (ver "hoja").
    - Si el nombre lleva "&", se muestra en grande al centro de la portada.
    - "foto" es opcional: pon la ruta o URL de una imagen.
    - "disponible: false" muestra el platillo tachado (agotado).
@@ -175,6 +176,10 @@ const NEGOCIO = {
   direccion: "Av. Siempre Viva 123, CDMX",
   mapa: "https://maps.google.com/?q=Av.+Siempre+Viva+123+CDMX",
   moneda: "$",
+  // Hoja de Google compartida como "Cualquier persona con el enlace: Lector".
+  // Formato: https://docs.google.com/spreadsheets/d/ID-DE-LA-HOJA/gviz/tq?tqx=out:csv&headers=1&gid=0
+  // Con link, los platillos salen de la hoja y MENU queda solo como respaldo.
+  hoja: "",
   horario: { dias: [1,2,3,4,5,6], abre: 8, cierra: 18 },
   nota: "Precios en pesos mexicanos. IVA incluido."
 };
@@ -204,7 +209,7 @@ const MENU = [
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const slug = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-");
+const slug = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-");
 const fmt = n => NEGOCIO.moneda + Number(n).toLocaleString("es-MX", {minimumFractionDigits: n % 1 ? 2 : 0});
 
 document.title = NEGOCIO.nombre + " | Carta";
@@ -229,34 +234,91 @@ $("links").innerHTML = [
   NEGOCIO.mapa && `<a href="${esc(NEGOCIO.mapa)}" target="_blank" rel="noopener">Cómo llegar</a>`
 ].filter(Boolean).join("");
 
-// Categorías y platillos
-$("tabs").innerHTML = MENU.map((c, i) =>
-  `<button class="tab${i ? "" : " active"}" data-target="${slug(c.categoria)}">${esc(c.categoria)}</button>`).join("");
+// Lee el CSV publicado de Google Sheets (respeta comillas y comas dentro de celdas)
+function parseCSV(text) {
+  const rows = []; let row = [], cell = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c !== '"') cell += c;
+      else if (text[i + 1] === '"') { cell += '"'; i++; }
+      else quoted = false;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(cell); rows.push(row); row = []; cell = "";
+    } else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
 
-$("menu").innerHTML = MENU.map(c => `
-  <section class="category" id="${slug(c.categoria)}">
-    <h2>${esc(c.categoria)}</h2>
-    ${c.nota ? `<p class="cat-note">${esc(c.nota)}</p>` : ""}
-    <div class="items">
-    ${c.platillos.map(p => `
-      <article class="item${p.disponible === false ? " unavailable" : ""}" data-search="${esc((p.nombre + " " + (p.descripcion || "")).toLowerCase())}">
-        ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nombre)}" loading="lazy">` : ""}
-        <div class="item-body">
-          <div class="item-top">
-            <h3>${esc(p.nombre)}</h3><span class="leader" aria-hidden="true"></span>
-            <span class="price">${p.disponible === false ? "agotado" : fmt(p.precio)}</span>
+// Convierte las filas de la hoja al mismo formato que MENU
+function menuFromSheet(text) {
+  const [head = [], ...rows] = parseCSV(text.replace(/^﻿/, ""));
+  const col = name => head.findIndex(h => slug(h).replace(/^-|-$/g, "") === name);
+  const C = {
+    cat: col("categoria"), nota: col("nota-de-categoria"), nombre: col("producto"), precio: col("precio"),
+    desc: col("descripcion"), tag: col("etiqueta"), agotado: col("agotado"), foto: col("foto")
+  };
+  if (C.cat < 0 || C.nombre < 0) throw new Error("La hoja necesita las columnas Categoría y Producto");
+  const menu = [];
+  for (const r of rows) {
+    const get = i => i < 0 ? "" : (r[i] || "").trim();
+    const categoria = get(C.cat), nombre = get(C.nombre);
+    if (!categoria || !nombre) continue;
+    let c = menu.find(m => m.categoria === categoria);
+    if (!c) menu.push(c = {categoria, platillos: []});
+    if (!c.nota && get(C.nota)) c.nota = get(C.nota);
+    c.platillos.push({
+      nombre,
+      precio: parseFloat(get(C.precio).replace(/[^0-9.]/g, "")) || 0,
+      descripcion: get(C.desc),
+      tags: get(C.tag) ? [get(C.tag)] : [],
+      disponible: !/^(s[ií]|x|agotado)$/i.test(get(C.agotado)),
+      foto: get(C.foto)
+    });
+  }
+  if (!menu.length) throw new Error("La hoja no tiene platillos");
+  return menu;
+}
+
+// Categorías y platillos
+function render(menu) {
+  $("tabs").innerHTML = menu.map((c, i) =>
+    `<button class="tab${i ? "" : " active"}" data-target="${slug(c.categoria)}">${esc(c.categoria)}</button>`).join("");
+
+  $("menu").innerHTML = menu.map(c => `
+    <section class="category" id="${slug(c.categoria)}">
+      <h2>${esc(c.categoria)}</h2>
+      ${c.nota ? `<p class="cat-note">${esc(c.nota)}</p>` : ""}
+      <div class="items">
+      ${c.platillos.map(p => `
+        <article class="item${p.disponible === false ? " unavailable" : ""}" data-search="${esc((p.nombre + " " + (p.descripcion || "")).toLowerCase())}">
+          ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nombre)}" loading="lazy">` : ""}
+          <div class="item-body">
+            <div class="item-top">
+              <h3>${esc(p.nombre)}</h3><span class="leader" aria-hidden="true"></span>
+              <span class="price">${p.disponible === false ? "agotado" : fmt(p.precio)}</span>
+            </div>
+            ${p.tags?.length ? `<p class="tags">${p.tags.map(esc).join(", ")}</p>` : ""}
+            ${p.descripcion ? `<p class="desc">${esc(p.descripcion)}</p>` : ""}
           </div>
-          ${p.tags?.length ? `<p class="tags">${p.tags.map(esc).join(", ")}</p>` : ""}
-          ${p.descripcion ? `<p class="desc">${esc(p.descripcion)}</p>` : ""}
-        </div>
-      </article>`).join("")}
-    </div>
-  </section>`).join("");
+        </article>`).join("")}
+      </div>
+    </section>`).join("");
+
+  tabs = [...tabsEl.querySelectorAll(".tab")];
+  io.disconnect();
+  document.querySelectorAll(".category").forEach(s => io.observe(s));
+  $("search").dispatchEvent(new Event("input"));
+}
 
 // Marca una categoría y centra su pestaña moviendo solo la barra,
 // nunca la página (eso cortaba el deslizamiento a medio camino)
 const tabsEl = $("tabs");
-const tabs = [...document.querySelectorAll(".tab")];
+let tabs = [];
 function setActive(id) {
   tabs.forEach(t => t.classList.toggle("active", t.dataset.target === id));
   const t = tabs.find(t => t.dataset.target === id); if (!t) return;
@@ -279,7 +341,6 @@ const io = new IntersectionObserver(entries => {
   if (jumping) return;
   entries.forEach(en => { if (en.isIntersecting) setActive(en.target.id); });
 }, {rootMargin: "-120px 0px -60% 0px"});
-document.querySelectorAll(".category").forEach(s => io.observe(s));
 
 // Buscador
 $("search").addEventListener("input", e => {
@@ -304,6 +365,30 @@ if (NEGOCIO.whatsapp) {
 $("footer").innerHTML =
   (NEGOCIO.direccion ? `<p class="addr">${esc(NEGOCIO.direccion)}</p>` : "") +
   (NEGOCIO.nota ? `<p>${esc(NEGOCIO.nota)}</p>` : "");
+
+// Carga la carta: primero la última copia guardada en el teléfono (abre al instante),
+// luego la versión más reciente de la hoja. Si la hoja falla, usa MENU.
+async function cargarCarta() {
+  if (!NEGOCIO.hoja) return render(MENU);
+  const key = "carta:" + NEGOCIO.hoja;
+  let shown = false;
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) { render(menuFromSheet(saved)); shown = true; }
+  } catch {}
+  if (!shown) $("menu").innerHTML = `<p class="empty" style="display:block">Cargando la carta…</p>`;
+  try {
+    const res = await fetch(NEGOCIO.hoja, {cache: "no-store"});
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    render(menuFromSheet(text));
+    try { localStorage.setItem(key, text); } catch {}
+  } catch (err) {
+    console.warn("No se pudo leer la hoja de Google; se muestra el menú de respaldo.", err);
+    if (!shown) render(MENU);
+  }
+}
+cargarCarta();
 </script>
 </body>
 </html>
