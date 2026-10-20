@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Menú</title>
+<meta name="description" content="Carta de Café Grano & Nube: café de especialidad, panadería y desayunos.">
+<meta name="theme-color" content="#14271F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Hanken+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bottle:#14271F;
+    --sage-deep:#1B3129;
+    --ivory:#EDE6D6;
+    --sage:#A3AE9F;
+    --brass:#C2A36B;
+    --brass-line:rgba(194,163,107,.38);
+    --serif:'Bodoni Moda', 'Didot', 'Bodoni 72', Georgia, serif;
+    --sans:'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;scroll-padding-top:116px;}
+  body{
+    background:var(--bottle);color:var(--ivory);
+    font-family:var(--sans);font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  :focus-visible{outline:1px solid var(--brass);outline-offset:4px;}
+  .wrap{max-width:560px;margin:0 auto;padding:0 20px;}
+
+  /* Portada: el nombre apilado dentro de un marco de doble línea */
+  header{padding:28px 16px 8px;}
+  .frame{
+    max-width:560px;margin:0 auto;padding:6px;
+    border:1px solid var(--brass-line);
+  }
+  .frame-inner{
+    border:1px solid var(--brass-line);
+    padding:40px 20px 30px;text-align:center;
+  }
+  .logo{width:72px;height:72px;margin:0 auto 18px;border-radius:50%;object-fit:cover;}
+  h1{font-family:var(--serif);font-weight:400;line-height:1;}
+  h1 .line{display:block;font-size:clamp(2.1rem,1.5rem + 3vw,2.9rem);letter-spacing:.01em;text-wrap:balance;}
+  h1 .amp{
+    display:block;font-style:italic;color:var(--brass);
+    font-size:clamp(6.5rem,5rem + 8vw,9rem);line-height:.82;margin:.04em 0 .02em;
+  }
+  .tagline{
+    font-family:var(--serif);font-style:italic;color:var(--sage);
+    font-size:1.05rem;margin-top:18px;text-wrap:balance;
+  }
+  .meta{margin-top:22px;font-size:.88rem;color:var(--sage);}
+  .meta .status{color:var(--ivory);}
+  .links{display:flex;justify-content:center;gap:22px;margin-top:10px;font-size:.88rem;}
+  .links a{text-decoration:underline;text-decoration-color:var(--brass-line);text-underline-offset:4px;}
+  .links a:hover{text-decoration-color:var(--brass);}
+
+  @media (prefers-reduced-motion:no-preference){
+    h1 .amp{animation:amp-in 1.4s cubic-bezier(.2,.7,.2,1) both .15s;}
+    @keyframes amp-in{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:none;}}
+  }
+
+  /* Navegación */
+  nav{
+    position:sticky;top:0;z-index:10;background:var(--bottle);
+    border-bottom:1px solid var(--brass-line);padding:14px 0 0;margin-top:20px;
+  }
+  .search{
+    width:100%;background:transparent;border:0;border-bottom:1px solid var(--brass-line);
+    color:var(--ivory);font:inherit;font-size:16px;padding:6px 0 8px;
+  }
+  .search::placeholder{color:var(--sage);font-family:var(--serif);font-style:italic;}
+  .search:focus{outline:none;border-bottom-color:var(--brass);}
+  .tabs{display:flex;gap:22px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:12px 0 0;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:0 0 auto;background:none;border:0;color:var(--sage);cursor:pointer;
+    font-family:var(--serif);font-size:1rem;white-space:nowrap;
+    padding:4px 0 12px;border-bottom:1px solid transparent;margin-bottom:-1px;min-height:44px;
+  }
+  .tab:hover{color:var(--ivory);}
+  .tab.active{color:var(--ivory);border-bottom-color:var(--brass);}
+
+  /* Carta */
+  main{padding-bottom:24px;}
+  .category{padding-top:52px;}
+  .category h2{
+    font-family:var(--serif);font-style:italic;font-weight:400;
+    font-size:2rem;text-align:center;line-height:1.1;
+  }
+  .category h2::after{
+    content:"";display:block;width:36px;height:1px;background:var(--brass);margin:16px auto 0;
+  }
+  .cat-note{text-align:center;color:var(--sage);font-size:.88rem;margin-top:12px;}
+  .items{margin-top:26px;}
+  .item{display:flex;gap:16px;padding:13px 0;}
+  .item img{width:68px;height:68px;object-fit:cover;flex:0 0 auto;}
+  .item-body{flex:1;min-width:0;}
+  .item-top{display:flex;align-items:baseline;gap:8px;}
+  .item h3{font-family:var(--serif);font-weight:500;font-size:1.12rem;line-height:1.3;}
+  .leader{flex:1;min-width:16px;border-bottom:1px dotted var(--brass-line);transform:translateY(-4px);}
+  .price{
+    font-family:var(--serif);font-size:1.12rem;color:var(--brass);
+    font-variant-numeric:lining-nums tabular-nums;white-space:nowrap;
+  }
+  .desc{color:var(--sage);font-size:.9rem;line-height:1.55;margin-top:4px;max-width:44ch;}
+  .tags{font-family:var(--serif);font-style:italic;color:var(--brass);font-size:.92rem;margin-top:3px;}
+  .item.unavailable h3{color:var(--sage);text-decoration:line-through;text-decoration-color:var(--brass-line);}
+  .item.unavailable .price{font-style:italic;color:var(--sage);}
+  .empty{
+    display:none;text-align:center;padding:56px 0;
+    font-family:var(--serif);font-style:italic;color:var(--sage);
+  }
+
+  footer{
+    text-align:center;color:var(--sage);font-size:.85rem;line-height:1.7;
+    padding:40px 20px 120px;margin-top:40px;border-top:1px solid var(--brass-line);
+  }
+  footer .addr{font-family:var(--serif);font-style:italic;font-size:1rem;color:var(--ivory);margin-bottom:6px;}
+
+  .wa{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(18px + env(safe-area-inset-bottom));
+    background:var(--sage-deep);color:var(--ivory);border:1px solid var(--brass);
+    padding:12px 26px;text-decoration:none;font-family:var(--serif);font-size:1rem;
+    white-space:nowrap;box-shadow:0 10px 30px rgba(5,14,10,.55);
+  }
+  .wa:hover{background:var(--brass);color:var(--bottle);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="frame"><div class="frame-inner">
+    <div id="logo"></div>
+    <h1 id="name"></h1>
+    <p class="tagline" id="tagline"></p>
+    <p class="meta" id="meta"></p>
+    <div class="links" id="links"></div>
+  </div></div>
+</header>
+
+<nav>
+  <div class="wrap">
+    <input class="search" id="search" type="search" placeholder="Buscar en la carta" aria-label="Buscar en la carta">
+    <div class="tabs" id="tabs"></div>
+  </div>
+</nav>
+
+<main class="wrap" id="menu"></main>
+<p class="empty wrap" id="empty">Nada en la carta coincide con tu búsqueda. Prueba con otra palabra.</p>
+
+<footer id="footer"></footer>
+
+<a class="wa" id="wa" target="_blank" rel="noopener" hidden>Pedir por WhatsApp</a>
+
+<script>
+/* =========================================================
+   EDITA SOLO ESTA PARTE
+   - Cambia los datos del negocio y los platillos.
+   - Si el nombre lleva "&", se muestra en grande al centro de la portada.
+   - "foto" es opcional: pon la ruta o URL de una imagen.
+   - "disponible: false" muestra el platillo tachado (agotado).
+   - Horario: días 0=domingo … 6=sábado, horas en formato 24h.
+   ========================================================= */
+const NEGOCIO = {
+  nombre: "Café Grano & Nube",
+  eslogan: "Café de especialidad y panadería artesanal",
+  logo: "",                 // ej. "../assets/logo.png" (vacío = sin logo)
+  telefono: "5512345678",
+  whatsapp: "525512345678", // con lada de país, sin + ni espacios (vacío = oculta botón)
+  direccion: "Calle Orizaba 45, Roma Norte, CDMX",
+  mapa: "https://maps.google.com/?q=Calle+Orizaba+45+Roma+Norte+CDMX",
+  moneda: "$",
+  horario: { dias: [0,1,2,3,4,5,6], abre: 7, cierra: 21 },
+  nota: "Leche vegetal de avena, almendra o coco por $15 adicionales. Shot extra de espresso, $12."
+};
+
+const MENU = [
+  { categoria: "Café caliente", nota: "Grano de Chiapas y Veracruz, tostado en casa", platillos: [
+    { nombre: "Espresso", precio: 38, descripcion: "Doble, intenso y con crema." },
+    { nombre: "Americano", precio: 42, descripcion: "Espresso alargado con agua caliente. 12 oz." },
+    { nombre: "Capuchino", precio: 55, descripcion: "Espresso, leche vaporizada y espuma cremosa.", tags: ["El más pedido"] },
+    { nombre: "Latte", precio: 58, descripcion: "Suave y lechoso. Con vainilla, caramelo o avellana, $10 más." },
+    { nombre: "Flat white", precio: 58, descripcion: "Doble ristretto con microespuma sedosa." },
+    { nombre: "Mocha", precio: 65, descripcion: "Espresso con chocolate de Oaxaca y leche." },
+    { nombre: "Café de olla", precio: 45, descripcion: "Con piloncillo y canela, como en casa." }
+  ]},
+  { categoria: "Fríos", platillos: [
+    { nombre: "Cold brew", precio: 60, descripcion: "Extraído en frío durante 18 horas.", tags: ["Recomendación de la casa"] },
+    { nombre: "Iced latte", precio: 62, descripcion: "Espresso, leche fría y hielo." },
+    { nombre: "Frappé de caramelo", precio: 75, descripcion: "Con crema batida y salsa de caramelo." },
+    { nombre: "Affogato", precio: 70, descripcion: "Helado de vainilla bañado en espresso." }
+  ]},
+  { categoria: "Sin café", platillos: [
+    { nombre: "Chai latte", precio: 60, descripcion: "Té negro con especias y leche." },
+    { nombre: "Matcha latte", precio: 68, descripcion: "Matcha ceremonial japonés con leche.", tags: ["Puede ser vegano"] },
+    { nombre: "Chocolate caliente", precio: 55, descripcion: "Chocolate de Oaxaca batido." },
+    { nombre: "Tisana del día", precio: 40, descripcion: "Pregunta por la infusión de hoy." }
+  ]},
+  { categoria: "Panadería", nota: "Horneada cada mañana", platillos: [
+    { nombre: "Croissant de mantequilla", precio: 42 },
+    { nombre: "Concha de vainilla", precio: 30 },
+    { nombre: "Rol de canela", precio: 48, descripcion: "Con glaseado de queso crema." },
+    { nombre: "Pan de elote", precio: 45, disponible: false },
+    { nombre: "Galleta de chispas", precio: 35, descripcion: "Grande, suave al centro." }
+  ]},
+  { categoria: "Para comer", nota: "De 7:00 a 14:00", platillos: [
+    { nombre: "Toast de aguacate", precio: 95, descripcion: "Pan de masa madre, aguacate, huevo pochado y semillas.", tags: ["Vegetariano"] },
+    { nombre: "Bagel de salmón", precio: 120, descripcion: "Queso crema, salmón ahumado, alcaparras y cebolla morada." },
+    { nombre: "Croissant de jamón y queso", precio: 85, descripcion: "Gratinado, con ensalada de la casa." },
+    { nombre: "Bowl de yogurt", precio: 80, descripcion: "Yogurt griego, granola casera, fruta de temporada y miel." }
+  ]},
+  { categoria: "Postres", platillos: [
+    { nombre: "Cheesecake de frutos rojos", precio: 70 },
+    { nombre: "Brownie con nuez", precio: 50, descripcion: "Con una bola de helado, $20 más." },
+    { nombre: "Pastel de zanahoria", precio: 65 }
+  ]}
+];
+/* ================= FIN DE LA PARTE EDITABLE ================= */
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const slug = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-");
+const fmt = n => NEGOCIO.moneda + Number(n).toLocaleString("es-MX", {minimumFractionDigits: n % 1 ? 2 : 0});
+
+document.title = NEGOCIO.nombre + " | Carta";
+
+// Portada: si el nombre lleva "&", se apila con el ampersand en grande
+const parts = NEGOCIO.nombre.split("&").map(s => s.trim());
+$("name").innerHTML = parts.length === 2
+  ? `<span class="line">${esc(parts[0])}</span><span class="amp" aria-hidden="true">&amp;</span><span class="line">${esc(parts[1])}</span>`
+  : `<span class="line">${esc(NEGOCIO.nombre)}</span>`;
+$("name").setAttribute("aria-label", NEGOCIO.nombre);
+$("tagline").textContent = NEGOCIO.eslogan;
+if (NEGOCIO.logo) $("logo").innerHTML = `<img class="logo" src="${esc(NEGOCIO.logo)}" alt="Logo de ${esc(NEGOCIO.nombre)}">`;
+
+// Abierto / cerrado según el horario
+const now = new Date(), h = NEGOCIO.horario;
+const open = h.dias.includes(now.getDay()) && now.getHours() >= h.abre && now.getHours() < h.cierra;
+$("meta").innerHTML = open
+  ? `<span class="status">Abierto hoy</span> hasta las ${h.cierra}:00`
+  : `<span class="status">Cerrado ahora.</span> Abrimos a las ${h.abre}:00`;
+$("links").innerHTML = [
+  NEGOCIO.telefono && `<a href="tel:${esc(NEGOCIO.telefono)}">Llamar</a>`,
+  NEGOCIO.mapa && `<a href="${esc(NEGOCIO.mapa)}" target="_blank" rel="noopener">Cómo llegar</a>`
+].filter(Boolean).join("");
+
+// Categorías y platillos
+$("tabs").innerHTML = MENU.map((c, i) =>
+  `<button class="tab${i ? "" : " active"}" data-target="${slug(c.categoria)}">${esc(c.categoria)}</button>`).join("");
+
+$("menu").innerHTML = MENU.map(c => `
+  <section class="category" id="${slug(c.categoria)}">
+    <h2>${esc(c.categoria)}</h2>
+    ${c.nota ? `<p class="cat-note">${esc(c.nota)}</p>` : ""}
+    <div class="items">
+    ${c.platillos.map(p => `
+      <article class="item${p.disponible === false ? " unavailable" : ""}" data-search="${esc((p.nombre + " " + (p.descripcion || "")).toLowerCase())}">
+        ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nombre)}" loading="lazy">` : ""}
+        <div class="item-body">
+          <div class="item-top">
+            <h3>${esc(p.nombre)}</h3><span class="leader" aria-hidden="true"></span>
+            <span class="price">${p.disponible === false ? "agotado" : fmt(p.precio)}</span>
+          </div>
+          ${p.tags?.length ? `<p class="tags">${p.tags.map(esc).join(", ")}</p>` : ""}
+          ${p.descripcion ? `<p class="desc">${esc(p.descripcion)}</p>` : ""}
+        </div>
+      </article>`).join("")}
+    </div>
+  </section>`).join("");
+
+// Marca una categoría y centra su pestaña moviendo solo la barra,
+// nunca la página (eso cortaba el deslizamiento a medio camino)
+const tabsEl = $("tabs");
+const tabs = [...document.querySelectorAll(".tab")];
+function setActive(id) {
+  tabs.forEach(t => t.classList.toggle("active", t.dataset.target === id));
+  const t = tabs.find(t => t.dataset.target === id); if (!t) return;
+  const bar = tabsEl.getBoundingClientRect(), r = t.getBoundingClientRect();
+  tabsEl.scrollTo({left: tabsEl.scrollLeft + r.left - bar.left - (bar.width - r.width) / 2, behavior: "smooth"});
+}
+
+// Mientras la página viaja a una categoría tocada, no se recalcula la activa
+let jumping = false, jumpTimer;
+const endJump = () => { jumping = false; clearTimeout(jumpTimer); };
+addEventListener("scrollend", endJump);
+tabsEl.addEventListener("click", e => {
+  const b = e.target.closest(".tab"); if (!b) return;
+  jumping = true; clearTimeout(jumpTimer); jumpTimer = setTimeout(endJump, 1500);
+  setActive(b.dataset.target);
+  $(b.dataset.target).scrollIntoView({behavior: "smooth"});
+});
+
+const io = new IntersectionObserver(entries => {
+  if (jumping) return;
+  entries.forEach(en => { if (en.isIntersecting) setActive(en.target.id); });
+}, {rootMargin: "-120px 0px -60% 0px"});
+document.querySelectorAll(".category").forEach(s => io.observe(s));
+
+// Buscador
+$("search").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  let any = false;
+  document.querySelectorAll(".category").forEach(sec => {
+    let shown = 0;
+    sec.querySelectorAll(".item").forEach(it => {
+      const ok = !q || it.dataset.search.includes(q);
+      it.hidden = !ok; if (ok) shown++;
+    });
+    sec.hidden = shown === 0; if (shown) any = true;
+  });
+  $("empty").style.display = any ? "none" : "block";
+});
+
+if (NEGOCIO.whatsapp) {
+  $("wa").href = `https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent("Hola, quiero hacer un pedido.")}`;
+  $("wa").hidden = false;
+}
+
+$("footer").innerHTML =
+  (NEGOCIO.direccion ? `<p class="addr">${esc(NEGOCIO.direccion)}</p>` : "") +
+  (NEGOCIO.nota ? `<p>${esc(NEGOCIO.nota)}</p>` : "");
+</script>
+</body>
+</html>
